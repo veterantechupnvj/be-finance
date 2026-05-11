@@ -146,3 +146,5 @@ node_modules/
 dist/
 drizzle/meta/
 *.js.map
+
+microsoft/
