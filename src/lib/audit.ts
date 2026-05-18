@@ -16,6 +16,8 @@
 import { db } from "../db";
 import { auditEvents } from "../db/schema";
 
+type AuditExecutor = Pick<typeof db, "insert">;
+
 export interface AuditParams {
   actorId: string | null;
   entityType: string;
@@ -24,7 +26,6 @@ export interface AuditParams {
   before?: unknown;
   after?: unknown;
   reason?: string;
-  executor?: any;
 }
 
 export type AuditAction =
@@ -45,9 +46,7 @@ export type AuditAction =
   | "role_assigned"
   | "role_revoked";
 
-export async function writeAudit(params: AuditParams): Promise<void> {
-  const executor = params.executor ?? db;
-
+async function insertAudit(executor: AuditExecutor, params: AuditParams): Promise<void> {
   await executor.insert(auditEvents).values({
     actorId: params.actorId,
     entityType: params.entityType,
@@ -57,6 +56,14 @@ export async function writeAudit(params: AuditParams): Promise<void> {
     after: params.after ?? null,
     reason: params.reason ?? null,
   });
+}
+
+export async function writeAudit(params: AuditParams): Promise<void> {
+  await insertAudit(db, params);
+}
+
+export async function writeAuditTx(tx: AuditExecutor, params: AuditParams): Promise<void> {
+  await insertAudit(tx, params);
 }
 
 export async function writeAuditSafe(params: AuditParams): Promise<void> {

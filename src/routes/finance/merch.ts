@@ -11,7 +11,7 @@ import {
 import { requireAuth } from "../../middleware/auth";
 import { requireRole } from "../../middleware/rbac";
 import { ok, err } from "../../lib/response";
-import { writeAudit } from "../../lib/audit";
+import { writeAudit, writeAuditTx } from "../../lib/audit";
 import type { TokenPayload } from "../../lib/jwt";
 
 const router = new Hono();
@@ -345,13 +345,12 @@ router.post("/sales", requireAuth, requireRole("finance"), async (c) => {
       })
       .returning();
 
-    await writeAudit({
+    await writeAuditTx(tx, {
       actorId: user.memberId,
       entityType: "fin_merch_sales",
       entityId: createdSale.id,
       action: "created",
       after: createdSale,
-      executor: tx,
     });
 
     return {

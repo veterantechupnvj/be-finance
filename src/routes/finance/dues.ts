@@ -13,7 +13,7 @@ import {
 import { requireAuth } from "../../middleware/auth";
 import { requireRole } from "../../middleware/rbac";
 import { ok, err } from "../../lib/response";
-import { writeAudit } from "../../lib/audit";
+import { writeAudit, writeAuditTx } from "../../lib/audit";
 import type { TokenPayload } from "../../lib/jwt";
 
 const router = new Hono();
@@ -247,7 +247,7 @@ router.patch("/:id/verify", requireAuth, requireRole("finance"), async (c) => {
       })
       .where(eq(finMemberDues.id, id));
 
-    await writeAudit({
+    await writeAuditTx(tx, {
       actorId: user.memberId,
       entityType: "fin_member_dues",
       entityId: id,
