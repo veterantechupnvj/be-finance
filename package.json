@@ -1,42 +1,56 @@
 {
-  "name": "finance-api",
-  "version": "1.0.0",
-  "description": "Backend for VeteranTech Finance Dashboard (Hono + Drizzle + Postgres)",
-  "license": "MIT",
+  "name": "be-finance",
   "type": "module",
-  "main": "src/index.ts",
   "scripts": {
-    "dev": "nodemon --watch 'src/**/*.ts' --exec 'bun' src/index.ts",
-    "build": "tsc --noEmit",
-    "start": "bun src/index.ts",
-    "lint": "oxlint",
-    "format": "oxfmt",
-    "check-lint": "oxlint --check",
-    "check-format": "oxfmt --check",
-    "migrate": "drizzle-kit migrate",
+    "dev": "bun run --hot src/index.ts",
+    "start": "bun run src/index.ts",
+    "build": "bun build src/index.ts --outdir ./dist --target bun",
+    "openapi:generate": "bun run src/scripts/generate-openapi.ts",
+    "db:seed-admin": "bun run src/scripts/seed-admin.ts",
+    "db:start": "docker-compose up -d",
+    "db:stop": "docker-compose down",
+    "db:reset": "docker-compose down -v && docker-compose up -d",
+    "db:m": "drizzle-kit generate && drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
     "generate": "drizzle-kit generate",
-    "seed:dev": "bun src/scripts/seed-dev.ts"
+    "migrate": "drizzle-kit migrate",
+    "push": "drizzle-kit push",
+    "studio": "drizzle-kit studio",
+    "fl": "oxlint && oxfmt --write",
+    "format": "oxfmt --write",
+    "format:check": "oxfmt --check",
+    "lint": "oxlint",
+    "check": "tsc --noEmit",
+    "prepare": "husky"
   },
   "dependencies": {
-    "@hono/node-server": "^2.0.2",
+    "@hono/node-server": "^2.0.3",
+    "@hono/zod-openapi": "^1.2.2",
+    "@scalar/hono-api-reference": "^0.9.47",
     "argon2": "^0.44.0",
-    "dotenv": "^17.4.2",
-    "drizzle-orm": "^0.45.2",
-    "hono": "^4.12.18",
-    "pg": "^8.20.0",
-    "zod": "^4.4.3"
+    "dotenv": "^17.3.1",
+    "drizzle-orm": "^0.45.1",
+    "drizzle-zod": "^0.8.3",
+    "hono": "^4.11.7",
+    "hono-rate-limiter": "^0.5.3",
+    "pg": "^8.21.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@types/node": "^25.6.2",
+    "@types/bun": "^1.2.15",
     "@types/pg": "^8.20.0",
-    "drizzle-kit": "^0.31.10",
-    "nodemon": "^3.0.1",
-    "oxfmt": "^0.48.0",
-    "oxlint": "^1.63.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^6.0.3"
+    "drizzle-kit": "^0.31.9",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "oxfmt": "^0.28.0",
+    "oxlint": "^1.43.0",
+    "typescript": "^5.8.3"
   },
-  "engines": {
-    "node": ">=20.0.0"
-  }
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json}": [
+      "bun format"
+    ]
+  },
+  "module": "src/index.ts",
+  "private": true
 }
