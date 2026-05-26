@@ -1,69 +1,78 @@
 # VeteranTech API - Conventions
 
 > Paste the relevant section of this file at the start of every AI prompt to keep output consistent.
+> For full architectural rules and golden rules, see `AGENTS.md`.
 
 ---
 
 ## Tech Stack
 
-- **Runtime:** Node.js
-- **Framework:** Hono
+- **Runtime:** Bun
+- **Framework:** Hono + `@hono/zod-openapi`
+- **API Docs:** Scalar (`@scalar/hono-api-reference`)
 - **ORM:** Drizzle ORM (PostgreSQL)
-- **Auth:** Custom JWT auth (`src/lib/jwt.ts` + `users` table)
+- **Auth:** Custom JWT — NIM + password (`src/lib/jwt.ts` + `users` table)
 - **Validation:** Zod
-- **Database:** PostgreSQL 15+
+- **Database:** PostgreSQL 16
 
 ---
 
 ## Project Structure
 
+```
 src/
-|- db/
-| |- schema/ # one file per domain
-| |- migrations/ # drizzle-kit generated
-| `- index.ts         # drizzle client
-|- routes/
-|  |- auth.ts
-|  `- finance/
-| |- categories.ts
-| |- cashflow.ts
-| |- dues.ts
-| |- merch.ts
-| |- programs.ts
-| `- reimbursements.ts
-|- middleware/
-|  |- auth.ts
-|  |- error-handler.ts
-|  `- rbac.ts
-|- lib/
-| |- audit.ts
-| |- auth.ts
-| |- jwt.ts
-| `- response.ts
-`- index.ts
+├── db/
+│   ├── schema/          # one file per domain
+│   ├── migrations/      # drizzle-kit generated — do not edit manually
+│   └── index.ts         # drizzle client singleton
+├── lib/
+│   ├── audit.ts
+│   ├── auth.ts
+│   ├── jwt.ts
+│   └── response.ts
+├── middleware/
+│   ├── auth.ts
+│   ├── error-handler.ts
+│   └── rbac.ts
+├── modules/
+│   └── [domain]/
+│       ├── [domain].routes.ts    # createRoute() definitions
+│       ├── [domain].handlers.ts  # thin handlers, call service if needed
+│       ├── [domain].schema.ts    # Zod schemas (request/response)
+│       ├── [domain].service.ts   # only if multi-table or transaction needed
+│       └── index.ts              # createRouter() + mount routes
+├── app.ts               # register all modules, middleware, OpenAPI spec
+├── factory.ts           # createRouter(), AppEnv, AppContext
+├── env.ts               # Zod env schema & Env type
+└── index.ts             # entry point only — import app; export default app
+```
 
 ### Rules
 
-- One route file per domain.
-- Keep route handlers thin.
-- Multi-step workflows that touch multiple tables should live in `services/` and accept a DB transaction.
-- Audit writes for multi-step mutations should use the same transaction executor as the main workflow.
-- Schema files should stay aligned with the API contract before new routes are added.
+- One module per domain.
+- Keep handlers thin — business logic goes in `*.service.ts`.
+- Create a service file only when a handler touches more than one table or needs a DB transaction.
+- Multi-table mutations must use `db.transaction()`.
+- Audit writes must use the same transaction executor as the main mutation.
+- Schema files must stay aligned with the API contract before new routes are added.
+- Never use `new Hono()` — always `createRouter()` from `src/factory.ts`.
+- All production routes must use `createRoute()` + `router.openapi()`.
 
 ---
 
 ## Naming Conventions
 
-| Context             | Style          | Example                          |
-| ------------------- | -------------- | -------------------------------- |
-| DB tables           | `snake_case`   | `fin_cashflow_entries`           |
-| DB columns          | `snake_case`   | `created_at`, `member_id`        |
-| API endpoints       | `kebab-case`   | `/finance/cashflow`              |
-| API request fields  | `snake_case`   | `cost_price`, `buyer_name`       |
-| API response fields | match contract | `cashflow_id`, `remaining_stock` |
-| TS variables        | `camelCase`    | `memberId`                       |
-| TS types/interfaces | `PascalCase`   | `TokenPayload`                   |
-| Files               | `kebab-case`   | `cashflow.ts`, `auth.ts`         |
+| Context                  | Style                | Example                             |
+| ------------------------ | -------------------- | ----------------------------------- |
+| DB tables                | `snake_case`         | `fin_cashflow_entries`              |
+| DB columns               | `snake_case`         | `created_at`, `member_id`           |
+| API endpoints            | `kebab-case`         | `/finance/cashflow-entries`         |
+| API request fields       | `snake_case`         | `cost_price`, `buyer_name`          |
+| API response fields      | `snake_case`         | `cashflow_id`, `remaining_stock`    |
+| TS variables / functions | `camelCase`          | `memberId`, `getHandler`            |
+| TS types / interfaces    | `PascalCase`         | `TokenPayload`, `AppEnv`            |
+| Files                    | `kebab-case`         | `cashflow.ts`, `error-handler.ts`   |
+| Module files             | `[domain].[role].ts` | `dues.service.ts`, `dues.routes.ts` |
 
 ---
 
@@ -72,10 +81,7 @@ src/
 ### Success
 
 ```json
-{
-  "success": true,
-  "data": {}
-}
+{ "success": true, "data": {} }
 ```
 
 ### Error
@@ -105,29 +111,34 @@ src/
 
 ## Auth Conventions
 
-- Login uses `nim` + password.
-- Passwords are hashed and stored in `users.password_hash`.
+- Login uses `nim` + password — no email, no OAuth.
+- Passwords stored as `password_hash` only — never plaintext.
 - All protected routes require `Authorization: Bearer <token>`.
-- `must_change_password` is enforced in auth middleware.
-- JWT payload must contain `sub`, `memberId`, `nim`, `roles`, and `mustChangePassword`.
+- `must_change_password` enforced in auth middleware.
+- JWT payload must contain: `sub`, `memberId`, `nim`, `roles`, `mustChangePassword`.
 
 ---
 
 ## RBAC Conventions
 
-- MVP roles are `finance` and `member`.
-- Route protection currently uses `requireRole(...)`.
+- MVP roles: `finance` and `member`.
+- Route protection uses `requireRole(...)` middleware.
 - Only `finance` can mutate finance resources.
-- Members can access read-only endpoints intended for dashboard transparency.
-- Do not mix role-based and permission-string middleware in parallel unless the app is explicitly migrated to a permission model.
+- `member` can access read-only transparency endpoints + submit their own requests.
 
 ---
 
 ## Drizzle Conventions
 
-- Every table has a UUID primary key.
+- Every table has a UUID primary key (`gen_random_uuid()`).
 - Every table has `created_at` and `updated_at`.
-- Tables supporting deletion use soft delete fields such as `deleted_at`, `deleted_by`, and `delete_reason`.
-- Finance queries should exclude soft-deleted rows by default.
-- Money is stored as `numeric/decimal`, never float.
-- Derived values such as merch sale totals should be computed from canonical stored fields when the schema does not persist them.
+- Tables supporting deletion use soft delete: `deleted_at`, `deleted_by`, `delete_reason`.
+- Finance queries must exclude soft-deleted rows by default.
+- **Money is stored as `numeric`/`decimal` — never `float`.**
+- Timestamps in OpenAPI schemas: `z.string().datetime()` — never `z.date()`.
+- Always validate destructured Drizzle returns before accessing properties:
+
+```typescript
+const [row] = await db.insert(table).values(data).returning();
+if (!row) throw new Error("Insert failed");
+```
