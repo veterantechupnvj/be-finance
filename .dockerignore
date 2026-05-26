@@ -1,0 +1,42 @@
+# ── Dependencies ──────────────────────────────────────────────────────────────
+node_modules
+.bun
+
+# ── Git ───────────────────────────────────────────────────────────────────────
+.git
+.gitignore
+.gitattributes
+
+# ── Environment files (NEVER bake secrets into image) ─────────────────────────
+.env
+.env.*
+!.env.example          # allow the example file
+
+# ── Docs & meta ──────────────────────────────────────────────────────────────
+README.md
+CONVENTIONS.md
+AGENTS.md
+docs/
+*.md
+
+# ── Dev tooling configs ───────────────────────────────────────────────────────
+.oxlintrc.json
+.oxfmtrc.json
+tsconfig.JSON
+biome.json
+
+# ── Editor & OS ──────────────────────────────────────────────────────────────
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+
+# ── Test & CI ─────────────────────────────────────────────────────────────────
+*.test.ts
+*.spec.ts
+coverage/
+.github/
+
+# ── Docker itself ─────────────────────────────────────────────────────────────
+Dockerfile
+docker-compose*.yml
