@@ -1,9 +1,14 @@
 import { and, desc, eq, gte, isNull, lte, sql, sum, type SQL } from "drizzle-orm";
 import { db } from "../../db";
 import { finCashflowEntries, finCategories, members, programs } from "../../db/schema";
-import { writeAudit, writeAuditTx } from "../../lib/audit";
 import { err, ok } from "../../lib/response";
 import type { AppRouteHandler } from "../../lib/route-handler";
+import {
+  CashflowServiceError,
+  createCashflow,
+  deleteCashflow,
+  updateCashflow,
+} from "./cashflow.service";
 import {
   cashflowSummaryRoute,
   createCashflowRoute,
@@ -134,8 +139,7 @@ export const listCashflowHandler: AppRouteHandler<typeof listCashflowRoute> = as
 
   return c.json(
     {
-      success: true,
-      data: rows,
+      ...ok(rows),
       meta: {
         total: count,
         page,
@@ -148,7 +152,7 @@ export const listCashflowHandler: AppRouteHandler<typeof listCashflowRoute> = as
 };
 
 export const cashflowSummaryHandler: AppRouteHandler<typeof cashflowSummaryRoute> = async (c) => {
-  const { year } = c.req.valid("query");
+  const { month, year } = c.req.valid("query");
   const selectedYear = year ?? new Date().getFullYear();
 
   const baseConditions: SQL[] = [
@@ -156,6 +160,12 @@ export const cashflowSummaryHandler: AppRouteHandler<typeof cashflowSummaryRoute
     gte(finCashflowEntries.date, `${selectedYear}-01-01`),
     lte(finCashflowEntries.date, `${selectedYear}-12-31`),
   ];
+  if (month !== undefined) {
+    const monthStart = `${selectedYear}-${String(month).padStart(2, "0")}-01`;
+    const monthEnd = new Date(Date.UTC(selectedYear, month, 0)).toISOString().slice(0, 10);
+    baseConditions.push(gte(finCashflowEntries.date, monthStart));
+    baseConditions.push(lte(finCashflowEntries.date, monthEnd));
+  }
 
   const totals = await db
     .select({
@@ -180,7 +190,7 @@ export const cashflowSummaryHandler: AppRouteHandler<typeof cashflowSummaryRoute
       `,
     })
     .from(finCashflowEntries)
-    .where(isNull(finCashflowEntries.deletedAt))
+    .where(and(...baseConditions))
     .groupBy(finCashflowEntries.paymentMethod);
 
   const incomeByCategory = await db
@@ -250,34 +260,30 @@ export const createCashflowHandler: AppRouteHandler<typeof createCashflowRoute> 
   const user = c.get("user");
   const data = c.req.valid("json");
 
-  const [created] = await db
-    .insert(finCashflowEntries)
-    .values({
-      type: data.type,
-      entryKind: data.entry_kind,
-      categoryId: data.category_id,
-      programId: data.program_id ?? null,
-      description: data.description,
-      amount: String(data.amount),
-      paymentMethod: data.payment_method,
-      receiptUrl: data.receipt_url ?? null,
-      date: data.date,
-      notes: data.notes ?? null,
-      recordedBy: user.memberId,
-    })
-    .returning();
-
-  if (!created) {
-    return c.json(err("INTERNAL_ERROR", "Failed to create cashflow entry"), 500);
+  let created;
+  try {
+    created = await createCashflow(
+      db,
+      {
+        type: data.type,
+        entryKind: data.entry_kind,
+        categoryId: data.category_id,
+        programId: data.program_id ?? null,
+        description: data.description,
+        amount: data.amount,
+        paymentMethod: data.payment_method,
+        receiptUrl: data.receipt_url ?? null,
+        date: data.date,
+        notes: data.notes ?? null,
+      },
+      user.memberId,
+    );
+  } catch (error) {
+    if (error instanceof CashflowServiceError) {
+      return c.json(err(error.code, error.message), 500);
+    }
+    throw error;
   }
-
-  await writeAudit({
-    actorId: user.memberId,
-    entityType: "fin_cashflow_entries",
-    entityId: created.id,
-    action: "created",
-    after: created,
-  });
 
   return c.json(ok(toCashflowResponse(created)), 201);
 };
@@ -287,68 +293,31 @@ export const updateCashflowHandler: AppRouteHandler<typeof updateCashflowRoute> 
   const { id } = c.req.valid("param");
   const data = c.req.valid("json");
 
-  const [existing] = await db
-    .select()
-    .from(finCashflowEntries)
-    .where(and(eq(finCashflowEntries.id, id), isNull(finCashflowEntries.deletedAt)))
-    .limit(1);
-
-  if (!existing) {
-    return c.json(err("NOT_FOUND", "Cashflow entry not found"), 404);
+  let updated;
+  try {
+    updated = await updateCashflow(
+      db,
+      id,
+      {
+        type: data.type,
+        entryKind: data.entry_kind,
+        categoryId: data.category_id,
+        programId: data.program_id,
+        description: data.description,
+        amount: data.amount,
+        paymentMethod: data.payment_method,
+        receiptUrl: data.receipt_url,
+        date: data.date,
+        notes: data.notes,
+      },
+      user.memberId,
+    );
+  } catch (error) {
+    if (error instanceof CashflowServiceError) {
+      return c.json(err(error.code, error.message), 404);
+    }
+    throw error;
   }
-
-  const updates: Partial<typeof finCashflowEntries.$inferInsert> = {
-    updatedBy: user.memberId,
-  };
-  if (data.type !== undefined) {
-    updates.type = data.type;
-  }
-  if (data.entry_kind !== undefined) {
-    updates.entryKind = data.entry_kind;
-  }
-  if (data.category_id !== undefined) {
-    updates.categoryId = data.category_id;
-  }
-  if (data.program_id !== undefined) {
-    updates.programId = data.program_id ?? null;
-  }
-  if (data.description !== undefined) {
-    updates.description = data.description;
-  }
-  if (data.amount !== undefined) {
-    updates.amount = String(data.amount);
-  }
-  if (data.payment_method !== undefined) {
-    updates.paymentMethod = data.payment_method;
-  }
-  if (data.receipt_url !== undefined) {
-    updates.receiptUrl = data.receipt_url ?? null;
-  }
-  if (data.date !== undefined) {
-    updates.date = data.date;
-  }
-  if (data.notes !== undefined) {
-    updates.notes = data.notes ?? null;
-  }
-
-  const [updated] = await db
-    .update(finCashflowEntries)
-    .set(updates)
-    .where(eq(finCashflowEntries.id, id))
-    .returning();
-
-  if (!updated) {
-    return c.json(err("INTERNAL_ERROR", "Failed to update cashflow entry"), 500);
-  }
-
-  await writeAudit({
-    actorId: user.memberId,
-    entityType: "fin_cashflow_entries",
-    entityId: id,
-    action: "updated",
-    before: existing,
-    after: updated,
-  });
 
   return c.json(ok(toCashflowResponse(updated)), 200);
 };
@@ -358,35 +327,14 @@ export const deleteCashflowHandler: AppRouteHandler<typeof deleteCashflowRoute> 
   const { id } = c.req.valid("param");
   const { reason } = c.req.valid("json");
 
-  const [existing] = await db
-    .select()
-    .from(finCashflowEntries)
-    .where(and(eq(finCashflowEntries.id, id), isNull(finCashflowEntries.deletedAt)))
-    .limit(1);
-
-  if (!existing) {
-    return c.json(err("NOT_FOUND", "Cashflow entry not found"), 404);
+  try {
+    await deleteCashflow(db, id, user.memberId, reason);
+  } catch (error) {
+    if (error instanceof CashflowServiceError) {
+      return c.json(err(error.code, error.message), 404);
+    }
+    throw error;
   }
-
-  await db.transaction(async (tx) => {
-    await tx
-      .update(finCashflowEntries)
-      .set({
-        deletedAt: new Date(),
-        deletedBy: user.memberId,
-        deleteReason: reason,
-      })
-      .where(eq(finCashflowEntries.id, id));
-
-    await writeAuditTx(tx, {
-      actorId: user.memberId,
-      entityType: "fin_cashflow_entries",
-      entityId: id,
-      action: "deleted",
-      before: existing,
-      reason,
-    });
-  });
 
   return c.json(ok({ message: "Entry deleted" }), 200);
 };
