@@ -1,6 +1,8 @@
 {
   "name": "be-finance",
+  "private": true,
   "type": "module",
+  "module": "src/index.ts",
   "scripts": {
     "dev": "bun run --hot src/index.ts",
     "start": "bun run src/index.ts",
@@ -50,7 +52,5 @@
     "*.{ts,tsx,js,jsx,json}": [
       "bun format"
     ]
-  },
-  "module": "src/index.ts",
-  "private": true
+  }
 }

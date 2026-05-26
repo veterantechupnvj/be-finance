@@ -56,10 +56,7 @@
     "require-yield": "warn",
     "use-isnan": "warn",
     "valid-typeof": "warn",
-    "max-lines": [
-      "warn",
-      { "max": 200, "skipBlankLines": true, "skipComments": true }
-    ],
+    "max-lines": ["warn", { "max": 200, "skipBlankLines": true, "skipComments": true }],
     "oxc/bad-array-method-on-arguments": "warn",
     "oxc/bad-char-at-comparison": "warn",
     "oxc/bad-comparison-sequence": "warn",
@@ -116,9 +113,5 @@
     "builtin": true
   },
   "globals": {},
-  "ignorePatterns": [
-    "node_modules",
-    "dist",
-    "src/db/migrations"
-  ]
+  "ignorePatterns": ["node_modules", "dist", "src/db/migrations"]
 }
