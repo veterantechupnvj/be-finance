@@ -1,7 +1,8 @@
 // src/lib/jwt.ts
 import { sign, verify } from "hono/jwt";
+import { env } from "../env";
 
-const JWT_SECRET = process.env.JWT_SECRET!;
+const JWT_SECRET = env.JWT_SECRET;
 const ACCESS_TOKEN_EXPIRY = 60 * 60 * 8; // 8 hours — user re-logs in after expiry
 
 export interface TokenPayload {

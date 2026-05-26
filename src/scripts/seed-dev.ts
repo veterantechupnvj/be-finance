@@ -34,7 +34,12 @@ async function getOrCreateMember(input: {
   return created;
 }
 
-async function getOrCreateUser(memberId: string, nim: string, password: string, mustChangePassword: boolean) {
+async function getOrCreateUser(
+  memberId: string,
+  nim: string,
+  password: string,
+  mustChangePassword: boolean,
+) {
   const [existing] = await db.select().from(users).where(eq(users.memberId, memberId)).limit(1);
   const passwordHash = await hashPassword(password);
 
@@ -107,7 +112,11 @@ async function getOrCreateActiveStaffPeriod() {
 }
 
 async function ensureStaffAssignment(memberId: string, staffId: string, divisionId: string) {
-  const [existing] = await db.select().from(staffMembers).where(eq(staffMembers.memberId, memberId)).limit(1);
+  const [existing] = await db
+    .select()
+    .from(staffMembers)
+    .where(eq(staffMembers.memberId, memberId))
+    .limit(1);
   if (!existing) {
     await db.insert(staffMembers).values({
       memberId,
@@ -119,7 +128,11 @@ async function ensureStaffAssignment(memberId: string, staffId: string, division
 }
 
 async function ensureCategory(name: string, type: "income" | "expense") {
-  const [existing] = await db.select().from(finCategories).where(eq(finCategories.name, name)).limit(1);
+  const [existing] = await db
+    .select()
+    .from(finCategories)
+    .where(eq(finCategories.name, name))
+    .limit(1);
   if (!existing) {
     await db.insert(finCategories).values({ name, type, isActive: true });
   }
