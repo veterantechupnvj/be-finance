@@ -19,10 +19,7 @@ export async function requireAuth(c: Context, next: Next) {
     // Block all endpoints except /auth/change-password until password is changed
     if (payload.mustChangePassword && !c.req.path.endsWith("/auth/change-password")) {
       return c.json(
-        err(
-          "MUST_CHANGE_PASSWORD",
-          "You must change your password before accessing other resources.",
-        ),
+        err("FORBIDDEN", "Password change required before accessing other resources."),
         403,
       );
     }

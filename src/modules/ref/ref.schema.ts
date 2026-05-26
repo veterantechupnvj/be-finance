@@ -5,8 +5,8 @@ export const divisionSchema = z
   .object({
     id: uuidSchema,
     name: z.string(),
-    isActive: z.boolean(),
-    unitId: uuidSchema.nullable(),
+    is_active: z.boolean(),
+    unit_id: uuidSchema.nullable(),
   })
   .openapi("ReferenceDivision");
 
@@ -14,9 +14,9 @@ export const staffPeriodSchema = z
   .object({
     id: uuidSchema,
     name: z.string(),
-    startDate: dateSchema,
-    endDate: dateSchema.nullable(),
-    isActive: z.boolean(),
+    start_date: dateSchema,
+    end_date: dateSchema.nullable(),
+    is_active: z.boolean(),
   })
   .openapi("ReferenceStaffPeriod");
 

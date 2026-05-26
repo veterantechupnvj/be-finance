@@ -10,8 +10,8 @@ export const listDivisionsHandler: AppRouteHandler<typeof listDivisionsRoute> = 
     .select({
       id: divisions.id,
       name: divisions.name,
-      isActive: divisions.isActive,
-      unitId: divisions.unitId,
+      is_active: divisions.isActive,
+      unit_id: divisions.unitId,
     })
     .from(divisions)
     .where(eq(divisions.isActive, true))
@@ -25,9 +25,9 @@ export const listStaffPeriodsHandler: AppRouteHandler<typeof listStaffPeriodsRou
     .select({
       id: staffPeriods.id,
       name: staffPeriods.name,
-      startDate: staffPeriods.startDate,
-      endDate: staffPeriods.endDate,
-      isActive: staffPeriods.isActive,
+      start_date: staffPeriods.startDate,
+      end_date: staffPeriods.endDate,
+      is_active: staffPeriods.isActive,
     })
     .from(staffPeriods)
     .orderBy(desc(staffPeriods.startDate));
@@ -42,9 +42,9 @@ export const getActiveStaffPeriodHandler: AppRouteHandler<
     .select({
       id: staffPeriods.id,
       name: staffPeriods.name,
-      startDate: staffPeriods.startDate,
-      endDate: staffPeriods.endDate,
-      isActive: staffPeriods.isActive,
+      start_date: staffPeriods.startDate,
+      end_date: staffPeriods.endDate,
+      is_active: staffPeriods.isActive,
     })
     .from(staffPeriods)
     .where(eq(staffPeriods.isActive, true))

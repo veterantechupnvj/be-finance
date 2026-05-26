@@ -22,6 +22,66 @@ import {
 
 const DEFAULT_DUES_AMOUNT = "15000";
 
+function toDuesRecordResponse(record: {
+  id: string;
+  month: number;
+  year: number;
+  amount: string;
+  status: "unpaid" | "pending" | "verified" | "exempt";
+  paymentMethod?: "bni" | "gopay" | "cash" | null;
+  receiptUrl?: string | null;
+  paidAt?: Date | null;
+  verifiedAt?: Date | null;
+  exemptReason?: string | null;
+  member?: { id: string | null; name: string | null; nim: string | null } | null;
+  verifiedBy?: string | null;
+}) {
+  return {
+    id: record.id,
+    month: record.month,
+    year: record.year,
+    amount: record.amount,
+    status: record.status,
+    payment_method: record.paymentMethod ?? null,
+    receipt_url: record.receiptUrl ?? null,
+    paid_at: record.paidAt ?? null,
+    verified_at: record.verifiedAt ?? null,
+    exempt_reason: record.exemptReason ?? null,
+    member: record.member,
+    verified_by: record.verifiedBy ?? null,
+  };
+}
+
+function toDuesConfigResponse(config: {
+  id: string;
+  staffPeriodId: string;
+  memberId: string;
+  monthlyAmount: string;
+  leniencyType: "none" | "reduced_fixed" | "reduced_temporary";
+  leniencyStart: string | null;
+  leniencyEnd: string | null;
+  notes: string | null;
+  configuredBy: string;
+  updatedBy: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}) {
+  return {
+    id: config.id,
+    staff_period_id: config.staffPeriodId,
+    member_id: config.memberId,
+    monthly_amount: config.monthlyAmount,
+    leniency_type: config.leniencyType,
+    leniency_start: config.leniencyStart,
+    leniency_end: config.leniencyEnd,
+    notes: config.notes,
+    configured_by: config.configuredBy,
+    updated_by: config.updatedBy,
+    created_at: config.createdAt,
+    updated_at: config.updatedAt,
+  };
+}
+
 export const listDuesHandler: AppRouteHandler<typeof listDuesRoute> = async (c) => {
   const query = c.req.valid("query");
 
@@ -63,7 +123,7 @@ export const listDuesHandler: AppRouteHandler<typeof listDuesRoute> = async (c) 
     .where(and(...conditions))
     .orderBy(finMemberDues.year, finMemberDues.month, members.name);
 
-  return c.json(ok(rows), 200);
+  return c.json(ok(rows.map(toDuesRecordResponse)), 200);
 };
 
 export const myDuesHandler: AppRouteHandler<typeof myDuesRoute> = async (c) => {
@@ -93,7 +153,7 @@ export const myDuesHandler: AppRouteHandler<typeof myDuesRoute> = async (c) => {
     )
     .orderBy(finMemberDues.month);
 
-  return c.json(ok(rows), 200);
+  return c.json(ok(rows.map(toDuesRecordResponse)), 200);
 };
 
 export const payDuesHandler: AppRouteHandler<typeof payDuesRoute> = async (c) => {
@@ -288,13 +348,13 @@ export const exemptDuesHandler: AppRouteHandler<typeof exemptDuesRoute> = async 
     reason: exempt_reason,
   });
 
-  return c.json(ok(updated), 200);
+  return c.json(ok(toDuesRecordResponse(updated)), 200);
 };
 
 export const getDuesConfigHandler: AppRouteHandler<typeof getDuesConfigRoute> = async (c) => {
   const { member_id } = c.req.valid("param");
   const rows = await db.select().from(finDuesConfig).where(eq(finDuesConfig.memberId, member_id));
-  return c.json(ok(rows), 200);
+  return c.json(ok(rows.map(toDuesConfigResponse)), 200);
 };
 
 export const upsertDuesConfigHandler: AppRouteHandler<typeof upsertDuesConfigRoute> = async (c) => {
@@ -338,5 +398,5 @@ export const upsertDuesConfigHandler: AppRouteHandler<typeof upsertDuesConfigRou
     after: config,
   });
 
-  return c.json(ok(config), 201);
+  return c.json(ok(toDuesConfigResponse(config)), 201);
 };

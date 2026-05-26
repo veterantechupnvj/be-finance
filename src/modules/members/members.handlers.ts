@@ -36,8 +36,8 @@ export const listMembersHandler: AppRouteHandler<typeof listMembersRoute> = asyn
         id: members.id,
         name: members.name,
         nim: members.nim,
-        cohortYear: members.cohortYear,
-        memberType: members.memberType,
+        cohort_year: members.cohortYear,
+        member_type: members.memberType,
         status: members.status,
       })
       .from(members)
@@ -73,8 +73,8 @@ export const getMemberHandler: AppRouteHandler<typeof getMemberRoute> = async (c
       id: members.id,
       name: members.name,
       nim: members.nim,
-      cohortYear: members.cohortYear,
-      memberType: members.memberType,
+      cohort_year: members.cohortYear,
+      member_type: members.memberType,
       status: members.status,
     })
     .from(members)

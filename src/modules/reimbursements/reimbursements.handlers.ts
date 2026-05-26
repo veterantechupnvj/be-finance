@@ -22,6 +22,60 @@ import {
   rejectReimbursementRoute,
 } from "./reimbursements.routes";
 
+function toReimbursementMutationResponse(reimbursement: {
+  id: string;
+  memberId: string;
+  programId: string | null;
+  categoryId: string;
+  activityTitle: string;
+  description: string | null;
+  amount: string;
+  purchaseReceiptUrl: string;
+  paymentDestination: "bni" | "gopay";
+  accountInfo: string;
+  status: "draft" | "submitted" | "approved" | "rejected" | "paid" | "cancelled";
+  rejectionReason: string | null;
+  approvedBy: string | null;
+  approvedAt: Date | null;
+  transferReceiptUrl: string | null;
+  paidAt: Date | null;
+  cashflowEntryId: string | null;
+  createdBy: string;
+  updatedBy: string | null;
+  deletedBy: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
+  deleteReason: string | null;
+}) {
+  return {
+    id: reimbursement.id,
+    member_id: reimbursement.memberId,
+    program_id: reimbursement.programId,
+    category_id: reimbursement.categoryId,
+    activity_title: reimbursement.activityTitle,
+    description: reimbursement.description,
+    amount: reimbursement.amount,
+    purchase_receipt_url: reimbursement.purchaseReceiptUrl,
+    payment_destination: reimbursement.paymentDestination,
+    account_info: reimbursement.accountInfo,
+    status: reimbursement.status,
+    rejection_reason: reimbursement.rejectionReason,
+    approved_by: reimbursement.approvedBy,
+    approved_at: reimbursement.approvedAt,
+    transfer_receipt_url: reimbursement.transferReceiptUrl,
+    paid_at: reimbursement.paidAt,
+    cashflow_entry_id: reimbursement.cashflowEntryId,
+    created_by: reimbursement.createdBy,
+    updated_by: reimbursement.updatedBy,
+    deleted_by: reimbursement.deletedBy,
+    created_at: reimbursement.createdAt,
+    updated_at: reimbursement.updatedAt,
+    deleted_at: reimbursement.deletedAt,
+    delete_reason: reimbursement.deleteReason,
+  };
+}
+
 export const listReimbursementsHandler: AppRouteHandler<typeof listReimbursementsRoute> = async (
   c,
 ) => {
@@ -41,17 +95,17 @@ export const listReimbursementsHandler: AppRouteHandler<typeof listReimbursement
   const rows = await db
     .select({
       id: finReimbursementRequests.id,
-      activityTitle: finReimbursementRequests.activityTitle,
+      activity_title: finReimbursementRequests.activityTitle,
       amount: finReimbursementRequests.amount,
       status: finReimbursementRequests.status,
-      paymentDestination: finReimbursementRequests.paymentDestination,
-      accountInfo: finReimbursementRequests.accountInfo,
-      purchaseReceiptUrl: finReimbursementRequests.purchaseReceiptUrl,
-      transferReceiptUrl: finReimbursementRequests.transferReceiptUrl,
-      rejectionReason: finReimbursementRequests.rejectionReason,
-      approvedAt: finReimbursementRequests.approvedAt,
-      paidAt: finReimbursementRequests.paidAt,
-      createdAt: finReimbursementRequests.createdAt,
+      payment_destination: finReimbursementRequests.paymentDestination,
+      account_info: finReimbursementRequests.accountInfo,
+      purchase_receipt_url: finReimbursementRequests.purchaseReceiptUrl,
+      transfer_receipt_url: finReimbursementRequests.transferReceiptUrl,
+      rejection_reason: finReimbursementRequests.rejectionReason,
+      approved_at: finReimbursementRequests.approvedAt,
+      paid_at: finReimbursementRequests.paidAt,
+      created_at: finReimbursementRequests.createdAt,
       member: { id: members.id, name: members.name, nim: members.nim },
       category: { id: finCategories.id, name: finCategories.name },
       program: { id: programs.id, name: programs.name },
@@ -72,13 +126,13 @@ export const myReimbursementsHandler: AppRouteHandler<typeof myReimbursementsRou
   const rows = await db
     .select({
       id: finReimbursementRequests.id,
-      activityTitle: finReimbursementRequests.activityTitle,
+      activity_title: finReimbursementRequests.activityTitle,
       amount: finReimbursementRequests.amount,
       status: finReimbursementRequests.status,
-      purchaseReceiptUrl: finReimbursementRequests.purchaseReceiptUrl,
-      transferReceiptUrl: finReimbursementRequests.transferReceiptUrl,
-      rejectionReason: finReimbursementRequests.rejectionReason,
-      createdAt: finReimbursementRequests.createdAt,
+      purchase_receipt_url: finReimbursementRequests.purchaseReceiptUrl,
+      transfer_receipt_url: finReimbursementRequests.transferReceiptUrl,
+      rejection_reason: finReimbursementRequests.rejectionReason,
+      created_at: finReimbursementRequests.createdAt,
       category: { id: finCategories.id, name: finCategories.name },
     })
     .from(finReimbursementRequests)
@@ -102,19 +156,19 @@ export const getReimbursementHandler: AppRouteHandler<typeof getReimbursementRou
   const [row] = await db
     .select({
       id: finReimbursementRequests.id,
-      activityTitle: finReimbursementRequests.activityTitle,
+      activity_title: finReimbursementRequests.activityTitle,
       description: finReimbursementRequests.description,
       amount: finReimbursementRequests.amount,
       status: finReimbursementRequests.status,
-      paymentDestination: finReimbursementRequests.paymentDestination,
-      accountInfo: finReimbursementRequests.accountInfo,
-      purchaseReceiptUrl: finReimbursementRequests.purchaseReceiptUrl,
-      transferReceiptUrl: finReimbursementRequests.transferReceiptUrl,
-      rejectionReason: finReimbursementRequests.rejectionReason,
-      approvedAt: finReimbursementRequests.approvedAt,
-      paidAt: finReimbursementRequests.paidAt,
-      createdAt: finReimbursementRequests.createdAt,
-      memberId: finReimbursementRequests.memberId,
+      payment_destination: finReimbursementRequests.paymentDestination,
+      account_info: finReimbursementRequests.accountInfo,
+      purchase_receipt_url: finReimbursementRequests.purchaseReceiptUrl,
+      transfer_receipt_url: finReimbursementRequests.transferReceiptUrl,
+      rejection_reason: finReimbursementRequests.rejectionReason,
+      approved_at: finReimbursementRequests.approvedAt,
+      paid_at: finReimbursementRequests.paidAt,
+      created_at: finReimbursementRequests.createdAt,
+      member_id: finReimbursementRequests.memberId,
       member: { id: members.id, name: members.name, nim: members.nim },
       category: { id: finCategories.id, name: finCategories.name },
       program: { id: programs.id, name: programs.name },
@@ -130,7 +184,7 @@ export const getReimbursementHandler: AppRouteHandler<typeof getReimbursementRou
     return c.json(err("NOT_FOUND", "Reimbursement not found"), 404);
   }
 
-  if (!isFinance && row.memberId !== user.memberId) {
+  if (!isFinance && row.member_id !== user.memberId) {
     return c.json(err("FORBIDDEN", "You do not have permission to view this request"), 403);
   }
 
@@ -211,7 +265,7 @@ export const createReimbursementHandler: AppRouteHandler<typeof createReimbursem
     after: created,
   });
 
-  return c.json(ok(created), 201);
+  return c.json(ok(toReimbursementMutationResponse(created)), 201);
 };
 
 export const approveReimbursementHandler: AppRouteHandler<
@@ -236,31 +290,41 @@ export const approveReimbursementHandler: AppRouteHandler<
     );
   }
 
-  const [updated] = await db
-    .update(finReimbursementRequests)
-    .set({
-      status: "approved",
-      approvedBy: user.memberId,
-      approvedAt: new Date(),
-      updatedBy: user.memberId,
-    })
-    .where(eq(finReimbursementRequests.id, id))
-    .returning();
+  let updatedReimbursement: typeof reimbursement | null = null;
 
-  if (!updated) {
+  await db.transaction(async (tx) => {
+    const [updated] = await tx
+      .update(finReimbursementRequests)
+      .set({
+        status: "approved",
+        approvedBy: user.memberId,
+        approvedAt: new Date(),
+        updatedBy: user.memberId,
+      })
+      .where(eq(finReimbursementRequests.id, id))
+      .returning();
+
+    if (!updated) {
+      throw new Error("Failed to approve reimbursement");
+    }
+
+    await writeAuditTx(tx, {
+      actorId: user.memberId,
+      entityType: "fin_reimbursement_requests",
+      entityId: id,
+      action: "reimbursement_approved",
+      before: reimbursement,
+      after: updated,
+    });
+
+    updatedReimbursement = updated;
+  });
+
+  if (!updatedReimbursement) {
     return c.json(err("INTERNAL_ERROR", "Failed to approve reimbursement"), 500);
   }
 
-  await writeAudit({
-    actorId: user.memberId,
-    entityType: "fin_reimbursement_requests",
-    entityId: id,
-    action: "reimbursement_approved",
-    before: reimbursement,
-    after: updated,
-  });
-
-  return c.json(ok(updated), 200);
+  return c.json(ok(toReimbursementMutationResponse(updatedReimbursement)), 200);
 };
 
 export const rejectReimbursementHandler: AppRouteHandler<typeof rejectReimbursementRoute> = async (
@@ -310,7 +374,7 @@ export const rejectReimbursementHandler: AppRouteHandler<typeof rejectReimbursem
     reason,
   });
 
-  return c.json(ok(updated), 200);
+  return c.json(ok(toReimbursementMutationResponse(updated)), 200);
 };
 
 export const markReimbursementPaidHandler: AppRouteHandler<
@@ -430,5 +494,5 @@ export const cancelReimbursementHandler: AppRouteHandler<typeof cancelReimbursem
     after: updated,
   });
 
-  return c.json(ok(updated), 200);
+  return c.json(ok(toReimbursementMutationResponse(updated)), 200);
 };

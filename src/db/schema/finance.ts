@@ -1,4 +1,5 @@
 import {
+  type AnyPgColumn,
   pgTable,
   uuid,
   varchar,
@@ -53,7 +54,9 @@ export const finCategories = pgTable("fin_categories", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   type: finTypeEnum("type").notNull(),
-  parentId: uuid("parent_id").references((): any => finCategories.id, { onDelete: "set null" }),
+  parentId: uuid("parent_id").references((): AnyPgColumn => finCategories.id, {
+    onDelete: "set null",
+  }),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true })

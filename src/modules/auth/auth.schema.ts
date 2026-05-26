@@ -10,8 +10,8 @@ export const loginRequestSchema = z
 
 export const changePasswordRequestSchema = z
   .object({
-    currentPassword: z.string().min(1),
-    newPassword: z.string().min(8),
+    current_password: z.string().min(1),
+    new_password: z.string().min(8),
   })
   .openapi("AuthChangePasswordRequest");
 
@@ -29,8 +29,8 @@ export const authProfileSchema = z
     id: z.string().uuid(),
     name: z.string(),
     nim: z.string(),
-    cohortYear: z.number().int(),
-    memberType: z.string(),
+    cohort_year: z.number().int(),
+    member_type: z.string(),
     status: z.string(),
     roles: z.array(z.string()),
   })
@@ -39,7 +39,7 @@ export const authProfileSchema = z
 export const loginResponseSchema = createSuccessSchema(
   z.object({
     token: z.string(),
-    mustChangePassword: z.boolean(),
+    must_change_password: z.boolean(),
     member: authMemberSchema,
   }),
 );

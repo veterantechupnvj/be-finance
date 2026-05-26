@@ -54,12 +54,12 @@ export const merchProductSchema = z
   .object({
     id: uuidSchema,
     name: z.string(),
-    merchLine: z.string().nullable(),
-    designUrl: z.string().nullable(),
-    costPrice: z.union([z.string(), z.number()]),
-    sellingPrice: z.union([z.string(), z.number()]),
+    merch_line: z.string().nullable(),
+    design_url: z.string().nullable(),
+    cost_price: z.union([z.string(), z.number()]),
+    selling_price: z.union([z.string(), z.number()]),
     stock: z.number().int(),
-    isActive: z.boolean(),
+    is_active: z.boolean(),
   })
   .openapi("MerchProduct");
 
@@ -67,20 +67,20 @@ export const merchSaleSchema = z
   .object({
     id: uuidSchema,
     qty: z.number().int(),
-    unitPrice: z.union([z.string(), z.number()]),
-    totalPrice: z.union([z.string(), z.number()]),
-    paymentMethod: merchPaymentMethodSchema,
-    receiptUrl: z.string().nullable(),
+    unit_price: z.union([z.string(), z.number()]),
+    total_price: z.union([z.string(), z.number()]),
+    payment_method: merchPaymentMethodSchema,
+    receipt_url: z.string().nullable(),
     date: dateSchema,
-    createdAt: dateTimeSchema,
+    created_at: dateTimeSchema,
     product: z
       .object({
         id: uuidSchema.nullable(),
         name: z.string().nullable(),
       })
       .nullable(),
-    buyerName: z.string().nullable(),
-    cashflowId: uuidSchema.nullable(),
+    buyer_name: z.string().nullable(),
+    cashflow_id: uuidSchema.nullable(),
   })
   .openapi("MerchSale");
 
@@ -110,13 +110,13 @@ export const merchProductsResponseSchema = createPaginatedSchema(merchProductSch
 export const merchProductResponseSchema = createSuccessSchema(merchProductSchema);
 export const merchProductMutationResponseSchema = createSuccessSchema(
   merchProductSchema.extend({
-    createdBy: uuidSchema.nullable().optional(),
-    updatedBy: uuidSchema.nullable().optional(),
-    deletedBy: uuidSchema.nullable().optional(),
-    createdAt: dateTimeSchema.optional(),
-    updatedAt: dateTimeSchema.optional(),
-    deletedAt: dateTimeSchema.nullable().optional(),
-    deleteReason: z.string().nullable().optional(),
+    created_by: uuidSchema.nullable().optional(),
+    updated_by: uuidSchema.nullable().optional(),
+    deleted_by: uuidSchema.nullable().optional(),
+    created_at: dateTimeSchema.optional(),
+    updated_at: dateTimeSchema.optional(),
+    deleted_at: dateTimeSchema.nullable().optional(),
+    delete_reason: z.string().nullable().optional(),
   }),
 );
 export const merchDeleteResponseSchema = createSuccessSchema(

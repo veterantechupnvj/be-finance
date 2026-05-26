@@ -12,6 +12,50 @@ import {
   updateCashflowRoute,
 } from "./cashflow.routes";
 
+function toCashflowResponse(entry: {
+  id: string;
+  type: "income" | "expense";
+  entryKind: "normal" | "opening_balance" | "adjustment";
+  categoryId: string;
+  programId: string | null;
+  description: string;
+  amount: string;
+  paymentMethod: "bni" | "gopay" | "cash";
+  receiptUrl: string | null;
+  sourceId?: string | null;
+  recordedBy: string;
+  updatedBy?: string | null;
+  deletedBy?: string | null;
+  date: string;
+  notes: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt?: Date | null;
+  deleteReason?: string | null;
+}) {
+  return {
+    id: entry.id,
+    type: entry.type,
+    entry_kind: entry.entryKind,
+    category_id: entry.categoryId,
+    program_id: entry.programId,
+    description: entry.description,
+    amount: entry.amount,
+    payment_method: entry.paymentMethod,
+    receipt_url: entry.receiptUrl,
+    source_id: entry.sourceId ?? null,
+    recorded_by: entry.recordedBy,
+    updated_by: entry.updatedBy ?? null,
+    deleted_by: entry.deletedBy ?? null,
+    date: entry.date,
+    notes: entry.notes,
+    created_at: entry.createdAt,
+    updated_at: entry.updatedAt,
+    deleted_at: entry.deletedAt ?? null,
+    delete_reason: entry.deleteReason ?? null,
+  };
+}
+
 export const listCashflowHandler: AppRouteHandler<typeof listCashflowRoute> = async (c) => {
   const user = c.get("user");
   const query = c.req.valid("query");
@@ -53,15 +97,15 @@ export const listCashflowHandler: AppRouteHandler<typeof listCashflowRoute> = as
       .select({
         id: finCashflowEntries.id,
         type: finCashflowEntries.type,
-        entryKind: finCashflowEntries.entryKind,
+        entry_kind: finCashflowEntries.entryKind,
         description: finCashflowEntries.description,
         amount: finCashflowEntries.amount,
-        paymentMethod: finCashflowEntries.paymentMethod,
-        receiptUrl: finCashflowEntries.receiptUrl,
+        payment_method: finCashflowEntries.paymentMethod,
+        receipt_url: finCashflowEntries.receiptUrl,
         date: finCashflowEntries.date,
         notes: finCashflowEntries.notes,
-        createdAt: finCashflowEntries.createdAt,
-        deletedAt: finCashflowEntries.deletedAt,
+        created_at: finCashflowEntries.createdAt,
+        deleted_at: finCashflowEntries.deletedAt,
         category: {
           id: finCategories.id,
           name: finCategories.name,
@@ -70,7 +114,7 @@ export const listCashflowHandler: AppRouteHandler<typeof listCashflowRoute> = as
           id: programs.id,
           name: programs.name,
         },
-        recordedBy: {
+        recorded_by: {
           id: members.id,
           name: members.name,
         },
@@ -235,7 +279,7 @@ export const createCashflowHandler: AppRouteHandler<typeof createCashflowRoute> 
     after: created,
   });
 
-  return c.json(ok(created), 201);
+  return c.json(ok(toCashflowResponse(created)), 201);
 };
 
 export const updateCashflowHandler: AppRouteHandler<typeof updateCashflowRoute> = async (c) => {
@@ -306,7 +350,7 @@ export const updateCashflowHandler: AppRouteHandler<typeof updateCashflowRoute> 
     after: updated,
   });
 
-  return c.json(ok(updated), 200);
+  return c.json(ok(toCashflowResponse(updated)), 200);
 };
 
 export const deleteCashflowHandler: AppRouteHandler<typeof deleteCashflowRoute> = async (c) => {

@@ -20,6 +20,42 @@ import {
   updateMerchProductRoute,
 } from "./merch.routes";
 
+function toMerchProductResponse(product: {
+  id: string;
+  name: string;
+  merchLine: string | null;
+  designUrl: string | null;
+  costPrice: string;
+  sellingPrice: string;
+  stock: number;
+  isActive: boolean;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  deletedBy?: string | null;
+  createdAt?: Date;
+  updatedAt?: Date;
+  deletedAt?: Date | null;
+  deleteReason?: string | null;
+}) {
+  return {
+    id: product.id,
+    name: product.name,
+    merch_line: product.merchLine,
+    design_url: product.designUrl,
+    cost_price: product.costPrice,
+    selling_price: product.sellingPrice,
+    stock: product.stock,
+    is_active: product.isActive,
+    created_by: product.createdBy ?? null,
+    updated_by: product.updatedBy ?? null,
+    deleted_by: product.deletedBy ?? null,
+    created_at: product.createdAt,
+    updated_at: product.updatedAt,
+    deleted_at: product.deletedAt ?? null,
+    delete_reason: product.deleteReason ?? null,
+  };
+}
+
 export const listMerchProductsHandler: AppRouteHandler<typeof listMerchProductsRoute> = async (
   c,
 ) => {
@@ -33,12 +69,12 @@ export const listMerchProductsHandler: AppRouteHandler<typeof listMerchProductsR
       .select({
         id: finMerchProducts.id,
         name: finMerchProducts.name,
-        merchLine: finMerchProducts.merchLine,
-        designUrl: finMerchProducts.designUrl,
-        costPrice: finMerchProducts.costPrice,
-        sellingPrice: finMerchProducts.sellingPrice,
+        merch_line: finMerchProducts.merchLine,
+        design_url: finMerchProducts.designUrl,
+        cost_price: finMerchProducts.costPrice,
+        selling_price: finMerchProducts.sellingPrice,
         stock: finMerchProducts.stock,
-        isActive: finMerchProducts.isActive,
+        is_active: finMerchProducts.isActive,
       })
       .from(finMerchProducts)
       .where(where)
@@ -72,12 +108,12 @@ export const getMerchProductHandler: AppRouteHandler<typeof getMerchProductRoute
     .select({
       id: finMerchProducts.id,
       name: finMerchProducts.name,
-      merchLine: finMerchProducts.merchLine,
-      designUrl: finMerchProducts.designUrl,
-      costPrice: finMerchProducts.costPrice,
-      sellingPrice: finMerchProducts.sellingPrice,
+      merch_line: finMerchProducts.merchLine,
+      design_url: finMerchProducts.designUrl,
+      cost_price: finMerchProducts.costPrice,
+      selling_price: finMerchProducts.sellingPrice,
       stock: finMerchProducts.stock,
-      isActive: finMerchProducts.isActive,
+      is_active: finMerchProducts.isActive,
     })
     .from(finMerchProducts)
     .where(
@@ -127,7 +163,7 @@ export const createMerchProductHandler: AppRouteHandler<typeof createMerchProduc
     after: created,
   });
 
-  return c.json(ok(created), 201);
+  return c.json(ok(toMerchProductResponse(created)), 201);
 };
 
 export const updateMerchProductHandler: AppRouteHandler<typeof updateMerchProductRoute> = async (
@@ -188,7 +224,7 @@ export const updateMerchProductHandler: AppRouteHandler<typeof updateMerchProduc
     after: updated,
   });
 
-  return c.json(ok(updated), 200);
+  return c.json(ok(toMerchProductResponse(updated)), 200);
 };
 
 export const deleteMerchProductHandler: AppRouteHandler<typeof deleteMerchProductRoute> = async (
@@ -250,18 +286,18 @@ export const listMerchSalesHandler: AppRouteHandler<typeof listMerchSalesRoute> 
       .select({
         id: finMerchSales.id,
         qty: finMerchSales.qty,
-        unitPrice: finMerchSales.unitPrice,
-        totalPrice: sql<string>`${finMerchSales.qty} * ${finMerchSales.unitPrice}`,
-        paymentMethod: finMerchSales.paymentMethod,
-        receiptUrl: finMerchSales.receiptUrl,
+        unit_price: finMerchSales.unitPrice,
+        total_price: sql<string>`${finMerchSales.qty} * ${finMerchSales.unitPrice}`,
+        payment_method: finMerchSales.paymentMethod,
+        receipt_url: finMerchSales.receiptUrl,
         date: finMerchSales.date,
-        createdAt: finMerchSales.createdAt,
+        created_at: finMerchSales.createdAt,
         product: {
           id: finMerchProducts.id,
           name: finMerchProducts.name,
         },
-        buyerName: finMerchSales.buyerName,
-        cashflowId: finMerchSales.cashflowEntryId,
+        buyer_name: finMerchSales.buyerName,
+        cashflow_id: finMerchSales.cashflowEntryId,
       })
       .from(finMerchSales)
       .leftJoin(finMerchProducts, eq(finMerchSales.productId, finMerchProducts.id))

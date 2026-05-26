@@ -36,10 +36,10 @@ export const programSchema = z
     status: z.string(),
     budget: z.union([z.string(), z.number()]).nullable(),
     description: z.string().nullable(),
-    startDate: dateSchema.nullable(),
-    endDate: dateSchema.nullable(),
+    start_date: dateSchema.nullable(),
+    end_date: dateSchema.nullable(),
     division: z.string().nullable().optional(),
-    divisionId: uuidSchema.nullable().optional(),
+    division_id: uuidSchema.nullable().optional(),
   })
   .openapi("Program");
 

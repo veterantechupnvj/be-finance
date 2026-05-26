@@ -52,7 +52,7 @@ export const loginHandler: AppRouteHandler<typeof loginRoute> = async (c) => {
   return c.json(
     ok({
       token,
-      mustChangePassword: row.mustChangePassword,
+      must_change_password: row.mustChangePassword,
       member: {
         id: row.memberId,
         name: row.name,
@@ -72,8 +72,8 @@ export const meHandler: AppRouteHandler<typeof meRoute> = async (c) => {
       id: members.id,
       name: members.name,
       nim: members.nim,
-      cohortYear: members.cohortYear,
-      memberType: members.memberType,
+      cohort_year: members.cohortYear,
+      member_type: members.memberType,
       status: members.status,
     })
     .from(members)
@@ -90,7 +90,7 @@ export const meHandler: AppRouteHandler<typeof meRoute> = async (c) => {
 };
 
 export const changePasswordHandler: AppRouteHandler<typeof changePasswordRoute> = async (c) => {
-  const { currentPassword, newPassword } = c.req.valid("json");
+  const { current_password, new_password } = c.req.valid("json");
   const user = c.get("user");
 
   const [row] = await db
@@ -103,12 +103,12 @@ export const changePasswordHandler: AppRouteHandler<typeof changePasswordRoute> 
     return c.json(err("NOT_FOUND", "User not found"), 404);
   }
 
-  const isValid = await verifyPassword(row.passwordHash, currentPassword);
+  const isValid = await verifyPassword(row.passwordHash, current_password);
   if (!isValid) {
     return c.json(err("UNAUTHORIZED", "Current password is incorrect"), 401);
   }
 
-  const passwordHash = await hashPassword(newPassword);
+  const passwordHash = await hashPassword(new_password);
 
   await db
     .update(users)

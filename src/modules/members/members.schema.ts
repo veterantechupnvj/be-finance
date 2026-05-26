@@ -23,8 +23,8 @@ export const memberListItemSchema = z
     id: uuidSchema,
     name: z.string(),
     nim: z.string(),
-    cohortYear: z.number().int(),
-    memberType: z.string(),
+    cohort_year: z.number().int(),
+    member_type: z.string(),
     status: z.string(),
   })
   .openapi("MemberListItem");

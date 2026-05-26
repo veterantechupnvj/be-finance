@@ -11,7 +11,7 @@ export function globalErrorHandler(error: Error, c: Context) {
 
   // Drizzle / pg foreign key violation
   if (error.message?.includes("foreign key constraint")) {
-    return c.json(err("BAD_REQUEST", "Referenced resource does not exist"), 400);
+    return c.json(err("VALIDATION_ERROR", "Referenced resource does not exist"), 422);
   }
 
   return c.json(err("INTERNAL_ERROR", "Something went wrong"), 500);

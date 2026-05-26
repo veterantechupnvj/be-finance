@@ -11,6 +11,32 @@ import {
   updateProgramRoute,
 } from "./programs.routes";
 
+function toProgramResponse(program: {
+  id: string;
+  name: string;
+  type: string;
+  status: string;
+  budget: string | null;
+  description: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  division?: string | null;
+  divisionId?: string | null;
+}) {
+  return {
+    id: program.id,
+    name: program.name,
+    type: program.type,
+    status: program.status,
+    budget: program.budget,
+    description: program.description,
+    start_date: program.startDate,
+    end_date: program.endDate,
+    division: program.division ?? null,
+    division_id: program.divisionId ?? null,
+  };
+}
+
 export const listProgramsHandler: AppRouteHandler<typeof listProgramsRoute> = async (c) => {
   const query = c.req.valid("query");
   const conditions: SQL[] = [];
@@ -42,7 +68,7 @@ export const listProgramsHandler: AppRouteHandler<typeof listProgramsRoute> = as
     .where(conditions.length > 0 ? and(...conditions) : undefined)
     .orderBy(programs.startDate);
 
-  return c.json(ok(rows), 200);
+  return c.json(ok(rows.map(toProgramResponse)), 200);
 };
 
 export const getProgramHandler: AppRouteHandler<typeof getProgramRoute> = async (c) => {
@@ -70,7 +96,7 @@ export const getProgramHandler: AppRouteHandler<typeof getProgramRoute> = async 
     return c.json(err("NOT_FOUND", "Program not found"), 404);
   }
 
-  return c.json(ok(row), 200);
+  return c.json(ok(toProgramResponse(row)), 200);
 };
 
 export const createProgramHandler: AppRouteHandler<typeof createProgramRoute> = async (c) => {
@@ -104,7 +130,7 @@ export const createProgramHandler: AppRouteHandler<typeof createProgramRoute> = 
     after: created,
   });
 
-  return c.json(ok(created), 201);
+  return c.json(ok(toProgramResponse(created)), 201);
 };
 
 export const updateProgramHandler: AppRouteHandler<typeof updateProgramRoute> = async (c) => {
@@ -159,5 +185,5 @@ export const updateProgramHandler: AppRouteHandler<typeof updateProgramRoute> = 
     after: updated,
   });
 
-  return c.json(ok(updated), 200);
+  return c.json(ok(toProgramResponse(updated)), 200);
 };
