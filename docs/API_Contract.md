@@ -1,10 +1,11 @@
 # VeteranTech API Contract
 
 > **Status:** Draft
-> **Base URL:** `https://api.veterantech.id/v1` (VPS self-hosted)
+> **Base URL:** Deployment-specific. Use generated OpenAPI output and router mounts for the current live base path.
 > **Framework:** Hono
 > **Auth:** JWT Bearer token
 > **Content-Type:** `application/json`
+> **Implementation Truth:** The current backend contract is defined by `src/modules/**/**/*.routes.ts`, `src/modules/**/**/*.schema.ts`, and generated OpenAPI output such as `openapi.json`. This file is a human-readable summary and may lag behind implementation if not updated.
 
 Related: [[Shared ERP Backend]], [[RBAC Permission Matrix]], [[PRD Draft]]
 
@@ -405,9 +406,8 @@ Aggregated summary for dashboard charts.
 **Query params:**
 | param | type | description |
 |---|---|---|
-| `period` | string | `monthly` \| `weekly` |
 | `year` | int | e.g. `2026` |
-| `month` | int | 1-12, optional (for weekly breakdown) |
+| `month` | int | 1-12, optional |
 
 **Response:**
 
@@ -557,13 +557,16 @@ Current user's own dues status across all months.
 
 Submit dues payment proof.
 
-**Request:** `multipart/form-data`
-| field | type | required |
-|---|---|---|
-| `month` | int | yes |
-| `year` | int | yes |
-| `payment_method` | string | yes |
-| `receipt` | file | yes |
+**Request:** `application/json`
+
+```json
+{
+  "month": 3,
+  "year": 2026,
+  "payment_method": "bni",
+  "receipt_url": "https://storage.example/dues/receipt.jpg"
+}
+```
 
 **Response:** `201`
 
@@ -586,11 +589,7 @@ Submit dues payment proof.
 
 Verify a pending dues payment. Auto-creates cashflow entry.
 
-**Request:**
-
-```json
-{ "verified": true }
-```
+**Request:** No body.
 
 **Response:**
 
@@ -600,7 +599,7 @@ Verify a pending dues payment. Auto-creates cashflow entry.
   "data": {
     "id": "uuid",
     "status": "verified",
-    "cashflow_id": "uuid"
+    "message": "Dues verified and cashflow entry created"
   }
 }
 ```
@@ -615,9 +614,6 @@ Mark a member as exempt for a given month.
 
 ```json
 {
-  "month": 3,
-  "year": 2026,
-  "member_id": "uuid",
   "exempt_reason": "Top point February 2026"
 }
 ```
@@ -730,16 +726,20 @@ Single reimbursement detail + audit history.
 
 Submit a reimbursement request.
 
-**Request:** `multipart/form-data`
-| field | type | required |
-|---|---|---|
-| `activity_title` | string | yes |
-| `category_id` | uuid | yes |
-| `program_id` | uuid | no |
-| `amount` | number | yes |
-| `payment_destination` | string | yes (`bni` \| `gopay`) |
-| `account_info` | string | yes |
-| `purchase_receipt` | file | yes |
+**Request:** `application/json`
+
+```json
+{
+  "activity_title": "Grocery run for event",
+  "category_id": "uuid",
+  "program_id": "uuid",
+  "description": "Snacks and bottled water",
+  "amount": 250000,
+  "purchase_receipt_url": "https://storage.example/reimbursements/purchase.jpg",
+  "payment_destination": "gopay",
+  "account_info": "08123456789"
+}
+```
 
 **Response:** `201` with created reimbursement object, `status: 'submitted'`.
 
@@ -769,10 +769,13 @@ Reject a reimbursement.
 
 Upload transfer receipt and mark as paid. Auto-creates cashflow entry.
 
-**Request:** `multipart/form-data`
-| field | type | required |
-|---|---|---|
-| `transfer_receipt` | file | yes |
+**Request:** `application/json`
+
+```json
+{
+  "transfer_receipt_url": "https://storage.example/reimbursements/transfer.jpg"
+}
+```
 
 **Response:**
 
@@ -859,9 +862,9 @@ List all sales records.
 **Query params:**
 | param | type | description |
 |---|---|---|
+| `page` | int | default 1 |
+| `per_page` | int | default 20, max 100 |
 | `product_id` | uuid | filter by product |
-| `date_from` | date | |
-| `date_to` | date | |
 
 **Response:**
 
@@ -918,6 +921,8 @@ Record a sale. Auto-decrements stock + auto-creates cashflow entry.
 ---
 
 ## 9. File Upload
+
+This endpoint is a planned capability, not part of the current implemented backend contract in this repository.
 
 ### `POST /upload` `[member]`
 
@@ -981,4 +986,4 @@ rejected → submitted (member resubmits — creates new record)
 
 ---
 
-_This contract is a living draft. Endpoints and shapes may evolve as implementation progresses. Frontend should always validate against this doc before building a new page._
+_This contract is a living summary. Frontend and backend work should validate against generated OpenAPI output and the route/schema files in `src/modules/` before relying on this document._

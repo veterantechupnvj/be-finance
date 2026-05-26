@@ -1,7 +1,7 @@
 # VeteranTech Database Schema — Shared ERP Backend
 
-> **Status:** Draft source of truth.
-> **Source of Truth:** Draft database schema, seed lists, indexes, auth tables, audit tables, and finance data model.
+> **Status:** Draft architecture notes.
+> **Implementation Truth:** The canonical implementation source of truth is `src/db/schema/`, `src/modules/**/**/*.routes.ts`, and generated OpenAPI artifacts such as `openapi.json`. This file is supplementary design documentation.
 
 Related: [[index]], [[VeteranTech Organization Database Notes]], [[RBAC Permission Matrix]], [[Tech Stack Decisions]]
 
@@ -50,7 +50,7 @@ Related: [[index]], [[VeteranTech Organization Database Notes]], [[RBAC Permissi
 │ fin_cashflow_entries│ │ Marcomms, │
 │ fin_member_dues │ │ Academic) │
 │ fin_dues_config │ │ │
-│ fin_reimbursements │ │ │
+│ fin_reimbursement_requests │ │ │
 │ fin_merch_products │ │ │
 │ fin_merch_sales │ │ │
 └─────────────┘ └─────────────┘
@@ -353,7 +353,7 @@ fin_reimbursement_requests
 **Notes:**
 
 - Valid status transitions follow [[Reimbursement State Machine]].
-- Every transition writes a row to `fin_reimbursement_events`.
+- Reimbursement history is captured in `audit_events` using `entity_type = 'fin_reimbursement_requests'`.
 
 ### 4.9 `fin_merch_products`
 
@@ -532,7 +532,7 @@ Do not seed or store plaintext passwords in the database.
 ### Staff Member Requests Reimbursement
 
 1. Staff member submits [[Reimbursement]] form (activity, category, amount, receipt, payment destination).
-2. System creates `fin_reimbursement_requests` row with `status: 'pending'`.
+2. System creates `fin_reimbursement_requests` row with `status: 'submitted'`.
 3. [[Finance]] reviews → `status: 'approved'` or `'rejected'`. `audit_events` row written.
 4. If approved, finance transfers money outside the app (manual).
 5. Finance uploads transfer receipt → `status: 'paid'`. `audit_events` row written.
@@ -556,4 +556,4 @@ Do not seed or store plaintext passwords in the database.
 
 ---
 
-_This schema is the current draft source of truth. Column types and constraints may still be adjusted during [[Drizzle]] schema creation._
+_This schema document is a draft design reference. When this file disagrees with the repo, prefer `src/db/schema/` and the route/schema files under `src/modules/`._

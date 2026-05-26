@@ -1,5 +1,5 @@
-> **Status:** Draft source of truth.
-> **Source of Truth:** Draft product requirements, feature scope, MVP phases, and user-facing workflows.
+> **Status:** Draft product requirements.
+> **Role of This Doc:** Product intent, scope, and workflow reference. It is not the canonical implementation source of truth.
 
 > **Organisasi:** VeteranTech — Organisasi Mahasiswa UPN Veteran Jakarta
 > **Date:** May 2026
@@ -211,7 +211,9 @@ A **smart expense & income tracker with categorization and visualization** — i
 
 ---
 
-## 7. Data Model (High-Level Entities)
+## 7. Data Model (Illustrative Only)
+
+This section is conceptual. Use `src/db/schema/` for the canonical data model.
 
 Members (shared across all modules)
 ├── id, nama, nim, angkatan, status
@@ -292,4 +294,4 @@ To avoid repeating the bloated portal mistake, Phase 1 should be split into smal
 
 ---
 
-_This document is a living draft. Updated as discussions progress._
+_This document is a living product draft. If it conflicts with the implemented backend contract, prefer `src/db/schema/`, `src/modules/`, and generated OpenAPI output._
