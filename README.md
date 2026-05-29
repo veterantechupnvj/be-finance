@@ -3,18 +3,19 @@
 Backend API untuk **VeteranTech Finance Dashboard**, dibangun dengan **Bun** + **Hono** + **custom JWT auth** + **Drizzle ORM**.
 
 Project ini adalah backend modular untuk organisasi VeteranTech UPNVJ. Finance Dashboard menjadi client pertama, lalu ke depannya backend dan database yang sama bisa dipakai juga oleh modul lain.
+
 ## Stack
 
-| Layer      | Tech                       |
-| ---------- | -------------------------- |
-| Runtime    | Bun                        |
-| Framework  | Hono                       |
-| OpenAPI    | `@hono/zod-openapi` + Scalar |
+| Layer      | Tech                          |
+| ---------- | ----------------------------- |
+| Runtime    | Bun                           |
+| Framework  | Hono                          |
+| OpenAPI    | `@hono/zod-openapi` + Scalar  |
 | Auth       | Custom JWT (`nim` + password) |
-| ORM        | Drizzle ORM                |
-| Database   | PostgreSQL 16             |
-| Validation | Zod                        |
-| Linting    | Oxlint + Oxfmt             |
+| ORM        | Drizzle ORM                   |
+| Database   | PostgreSQL 16                 |
+| Validation | Zod                           |
+| Linting    | Oxlint + Oxfmt                |
 
 ## Karakter Sistem
 
@@ -52,11 +53,11 @@ NODE_ENV=development
 
 Variabel yang dipakai saat ini:
 
-| Variable       | Keterangan |
-| -------------- | ---------- |
-| `DATABASE_URL` | Connection string PostgreSQL |
-| `JWT_SECRET`   | Secret untuk sign/verify JWT |
-| `PORT`         | Port server, default `3456` |
+| Variable       | Keterangan                               |
+| -------------- | ---------------------------------------- |
+| `DATABASE_URL` | Connection string PostgreSQL             |
+| `JWT_SECRET`   | Secret untuk sign/verify JWT             |
+| `PORT`         | Port server, default `3456`              |
 | `NODE_ENV`     | `development`, `test`, atau `production` |
 
 Definisi resminya ada di [src/env.ts](src/env.ts).
@@ -128,46 +129,46 @@ bun run start
 
 ### System
 
-| Method | Endpoint             | Keterangan |
-| ------ | -------------------- | ---------- |
-| `GET`  | `/health`            | Health check |
-| `GET`  | `/api/openapi.json`  | OpenAPI document |
-| `GET`  | `/reference`         | Scalar interactive API docs |
+| Method | Endpoint            | Keterangan                  |
+| ------ | ------------------- | --------------------------- |
+| `GET`  | `/health`           | Health check                |
+| `GET`  | `/api/openapi.json` | OpenAPI document            |
+| `GET`  | `/reference`        | Scalar interactive API docs |
 
 ### Auth
 
-| Method | Endpoint                | Keterangan |
-| ------ | ----------------------- | ---------- |
-| `POST` | `/auth/login`           | Login dengan `nim` + `password` |
-| `POST` | `/auth/change-password` | Ganti password user |
-| `POST` | `/auth/logout`          | Logout |
+| Method | Endpoint                | Keterangan                          |
+| ------ | ----------------------- | ----------------------------------- |
+| `POST` | `/auth/login`           | Login dengan `nim` + `password`     |
+| `POST` | `/auth/change-password` | Ganti password user                 |
+| `POST` | `/auth/logout`          | Logout                              |
 | `GET`  | `/auth/me`              | Ambil profil user yang sedang login |
 
 ### Members
 
-| Method | Endpoint       | Keterangan |
-| ------ | -------------- | ---------- |
-| `GET`  | `/members`     | List member |
+| Method | Endpoint       | Keterangan    |
+| ------ | -------------- | ------------- |
+| `GET`  | `/members`     | List member   |
 | `GET`  | `/members/:id` | Detail member |
 
 ### Reference Data
 
-| Method | Endpoint                     | Keterangan |
-| ------ | ---------------------------- | ---------- |
-| `GET`  | `/ref/divisions`             | List divisions |
-| `GET`  | `/ref/staff-periods`         | List staff periods |
-| `GET`  | `/ref/staff-periods/active`  | Staff period aktif |
+| Method | Endpoint                    | Keterangan         |
+| ------ | --------------------------- | ------------------ |
+| `GET`  | `/ref/divisions`            | List divisions     |
+| `GET`  | `/ref/staff-periods`        | List staff periods |
+| `GET`  | `/ref/staff-periods/active` | Staff period aktif |
 
 ### Finance Modules
 
-| Prefix                     | Keterangan |
-| -------------------------- | ---------- |
-| `/finance/categories`      | Kategori pemasukan/pengeluaran |
-| `/finance/programs`        | Program kerja dan event |
-| `/finance/cashflow`        | Ledger cashflow dan summary |
-| `/finance/dues`            | Uang kas anggota |
-| `/finance/reimbursements`  | Pengajuan reimbursement |
-| `/finance/merch`           | Produk merch dan sales |
+| Prefix                    | Keterangan                     |
+| ------------------------- | ------------------------------ |
+| `/finance/categories`     | Kategori pemasukan/pengeluaran |
+| `/finance/programs`       | Program kerja dan event        |
+| `/finance/cashflow`       | Ledger cashflow dan summary    |
+| `/finance/dues`           | Uang kas anggota               |
+| `/finance/reimbursements` | Pengajuan reimbursement        |
+| `/finance/merch`          | Produk merch dan sales         |
 
 Untuk detail request/response schema, gunakan OpenAPI dan file route/schema di `src/modules/`.
 
@@ -254,4 +255,3 @@ Source of truth implementasi backend ada di:
 - `src/modules/**/**/*.routes.ts`
 - `src/modules/**/**/*.schema.ts`
 - `openapi.json`
-
