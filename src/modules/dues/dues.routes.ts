@@ -130,6 +130,7 @@ export const exemptDuesRoute = createRoute({
     401: standardErrorResponses[401],
     403: standardErrorResponses[403],
     404: standardErrorResponses[404],
+    409: standardErrorResponses[409],
     422: standardErrorResponses[422],
     500: standardErrorResponses[500],
   },

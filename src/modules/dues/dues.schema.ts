@@ -130,9 +130,7 @@ export const verifyDuesResponseSchema = createSuccessSchema(
     message: z.string(),
   }),
 );
-export const exemptDuesResponseSchema = createSuccessSchema(
-  duesConfigSchema.partial().and(duesRecordSchema),
-);
+export const exemptDuesResponseSchema = createSuccessSchema(duesRecordSchema);
 export const duesConfigListResponseSchema = createSuccessSchema(z.array(duesConfigSchema));
 export const duesConfigResponseSchema = createSuccessSchema(duesConfigSchema);
 export const duesConfigPathSchema = memberIdParamSchema.openapi("DuesConfigPathParams");
