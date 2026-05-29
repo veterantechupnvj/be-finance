@@ -47,7 +47,7 @@ Contoh:
 ```env
 DATABASE_URL=postgres://postgres:postgres@localhost:5432/be_finance
 JWT_SECRET=change-me-to-a-long-random-string
-PORT=3456
+PORT=3000
 NODE_ENV=development
 ```
 
